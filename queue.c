@@ -16,12 +16,6 @@ Queue* queueCreate(int max_size) {
         exit(0);
     }
 
-    err = pthread_cond_init(&queue->full_cond, NULL);
-    if (err != 0) {
-        free(queue);
-        fprintf(stderr, "pthread_cond_init error: %s\n", strerror(err));
-        exit(0);
-    }
 
     err = pthread_cond_init(&queue->empty_cond, NULL);
     if (err != 0) {
@@ -34,9 +28,9 @@ Queue* queueCreate(int max_size) {
     return queue;
 }
 
-void queuePush(Queue* queue, void* data) {
+void queuePush(Queue* queue, int fd) {
     Node* node = Malloc(sizeof(Node));
-    node->data = data;
+    node->fd = fd;
 
     pthread_mutex_lock(&queue->lock);
     if (queue->size==0) {
@@ -44,9 +38,6 @@ void queuePush(Queue* queue, void* data) {
         queue->tail = node;
     }
     else {
-        while (queue->size >= queue->max_size) {
-            pthread_cond_wait(&queue->full_cond, &queue->lock);
-        }
         queue->tail->next = node;
         queue->tail = node;
     }
@@ -55,18 +46,18 @@ void queuePush(Queue* queue, void* data) {
     pthread_mutex_unlock(&queue->lock);
 }
 
-void* queuePop(Queue* queue) {
+int queuePop(Queue* queue) {
     pthread_mutex_lock(&queue->lock);
     while (queue->size == 0) {
-        pthread_cond_wait(&queue->empty_cond);
+        pthread_cond_wait(&queue->empty_cond, &queue->lock);
     }
     Node* node = queue->head;
     queue->head = queue->head->next;
     queue->size--;
-    pthread_cond_signal(&queue->full_cond);
+    
     pthread_mutex_unlock(&queue->lock);
 
-    void* temp = node->data;
+    int temp = node->fd;
     free(node);
 
     return temp;

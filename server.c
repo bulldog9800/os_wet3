@@ -1,5 +1,6 @@
 #include "segel.h"
 #include "request.h"
+#include "queue.h"
 
 // 
 // server.c: A very, very simple web server
@@ -34,6 +35,13 @@ int main(int argc, char *argv[])
     // 
     // HW3: Create some threads...
     //
+    pthread_t* threads = (pthread_t*) Malloc(sizeof(pthread_t)*thread_num);
+    Queue* pending_requests_queue = queueCreate(thread_num);
+    pthread_mutex_init(&active_threads_lock, NULL);
+
+    for (int i=0; i<thread_num; i++){
+        pthread_create(&threads[i], NULL, threadRequestHandle, pending_requests_queue);
+    }
 
     listenfd = Open_listenfd(port);
     while (1) {
@@ -44,10 +52,9 @@ int main(int argc, char *argv[])
 	// HW3: In general, don't handle the request in the main thread.
 	// Save the relevant info in a buffer and have one of the worker threads 
 	// do the work. 
-	// 
-	requestHandle(connfd);
+	//
+	queuePush(pending_requests_queue, connfd);
 
-	Close(connfd);
     }
 
 }

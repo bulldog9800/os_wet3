@@ -8,10 +8,12 @@
 #include <pthread.h>
 #include "segel.h"
 
-
+int active_threads = 0;
+pthread_mutex_t active_threads_lock;
 
 typedef struct Node_t {
     void* data;
+    int fd;
     struct Node_t* next;
 } Node;
 
@@ -26,7 +28,8 @@ typedef struct Queue_t {
 } Queue;
 
 Queue* queueCreate(int max_size);
-void queuePush(Queue* queue, void* data);
+void queuePush(Queue* queue, int fd);
+int queuePop(Queue* queue);
 
 
 #endif //OS_WET3_QUEUE_H

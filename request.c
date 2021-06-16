@@ -194,4 +194,20 @@ void requestHandle(int fd)
    }
 }
 
+void* threadRequestHandle(void* queue) {
+    while(1) {
+        int fd = queuePop(queue);
+        pthread_mutex_lock(&active_threads_lock);
+        active_threads++;
+        pthread_mutex_unlock(&active_threads_lock);
+
+        requestHandle(fd);
+        Close(fd);
+
+        pthread_mutex_lock(&active_threads_lock);
+        active_threads--;
+        pthread_mutex_unlock(&active_threads_lock);
+    }
+    return NULL;
+}
 
