@@ -2,7 +2,6 @@
 // request.c: Does the bulk of the work for the web server.
 // 
 
-#include "segel.h"
 #include "request.h"
 
 // requestError(      fd,    filename,        "404",    "Not found", "OS-HW3 Server could not find this file");
@@ -138,7 +137,7 @@ void requestServeDynamic(int fd, char *filename, char *cgiargs, Thread* thread_i
     gettimeofday(&thread_info->finish_time, NULL);
     dispatch_time.tv_usec = thread_info->finish_time.tv_usec - thread_info->arrival_time.tv_usec;
     dispatch_time.tv_sec = thread_info->finish_time.tv_sec - thread_info->arrival_time.tv_sec;
-    
+
     // The server does only a little bit of the header.
    // The CGI script has to finish writing out the header.
    sprintf(buf, "HTTP/1.0 200 OK\r\n");

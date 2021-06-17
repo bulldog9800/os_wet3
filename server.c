@@ -1,6 +1,4 @@
-#include "segel.h"
 #include "request.h"
-#include "helpers.h"
 
 // 
 // server.c: A very, very simple web server
@@ -28,7 +26,7 @@ void getargs(int *port, int *thread_num, int* buffer_size, char* policy,int argc
 
 int main(int argc, char *argv[])
 {
-    int listenfd, connfd, port, clientlen, thread_num, buffer_size;
+    int listenfd, connfd, port, clientlen, thread_num, buffer_size, i;
     struct sockaddr_in clientaddr;
     char policy[7];
 
@@ -43,7 +41,7 @@ int main(int argc, char *argv[])
     pending_requests_queue = queueCreate(thread_num);
     pthread_mutex_init(&active_threads_lock, NULL);
 
-    for (int i=0; i<thread_num; i++){
+    for (i=0; i<thread_num; i++){
         thread_infos[i].id = i;
         thread_infos[i].count = 0;
         thread_infos[i].dynamic_count = 0;

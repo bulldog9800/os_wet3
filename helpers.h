@@ -8,10 +8,11 @@
 #include <pthread.h>
 #include "segel.h"
 #include <sys/time.h>
+#include <string.h>
 
 typedef struct timeval timeval_t;
 
-int active_threads = 0;
+extern int active_threads;
 pthread_mutex_t active_threads_lock;
 pthread_mutex_t full_queue_lock;
 pthread_cond_t full_cond;

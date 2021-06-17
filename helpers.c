@@ -4,6 +4,8 @@
 
 #include "helpers.h"
 
+int active_threads = 0;
+
 
 Queue* queueCreate(int max_size) {
     Queue* queue = (Queue*) Malloc(sizeof(Queue));
