@@ -2,7 +2,7 @@
 // Created by Sari Abed on 13/06/2021.
 //
 
-#include "queue.h"
+#include "helpers.h"
 
 
 Queue* queueCreate(int max_size) {
@@ -31,6 +31,8 @@ Queue* queueCreate(int max_size) {
 void queuePush(Queue* queue, int fd) {
     Node* node = Malloc(sizeof(Node));
     node->fd = fd;
+    gettimeofday(&node->tv, NULL);
+
 
     pthread_mutex_lock(&queue->lock);
     if (queue->size==0) {
@@ -48,14 +50,18 @@ void queuePush(Queue* queue, int fd) {
 
 int queuePop(Queue* queue) {
     pthread_mutex_lock(&queue->lock);
+    pthread_mutex_lock(&active_threads_lock);
     while (queue->size == 0) {
         pthread_cond_wait(&queue->empty_cond, &queue->lock);
     }
     Node* node = queue->head;
     queue->head = queue->head->next;
     queue->size--;
-    
+
+    active_threads++;
+
     pthread_mutex_unlock(&queue->lock);
+    pthread_mutex_unlock(&active_threads_lock);
 
     int temp = node->fd;
     free(node);
@@ -63,3 +69,15 @@ int queuePop(Queue* queue) {
     return temp;
 }
 
+Thread* thread_creat(int id){
+    Thread* thread =(Thread*) Malloc(sizeof(Thread));
+    thread->id=id;
+    thread->static_count=0;
+    thread->dynamic_count=0;
+    thread->count = 0;
+    return  thread ;
+}
+
+Node* queueTop(Queue* queue) {
+    return queue->head;
+}
